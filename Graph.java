@@ -1,3 +1,8 @@
+/**
+ * Jay Hwasung Jung
+ * CS 224
+ * programming homework 01 - BFS
+ */
 import java.util.*;
 import java.util.Scanner;
 
