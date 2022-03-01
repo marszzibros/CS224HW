@@ -94,7 +94,6 @@ class BinaryHeap {
     } 
     private boolean isLeaf(int pos) {
         if (pos > (size / 2) && pos <= size) {
-            System.out.println("1");
             return true;
         }
         else return false;
@@ -138,18 +137,20 @@ class BinaryHeap {
     }
     public int extractMin() {
         int popped = heaps[FRONT];
+        int index = -1;
         heaps[FRONT] = heaps[size];
         for (int i = 0; i < maxSize; i ++) {
-            System.out.println(nodes[i]);
             if (nodes[i] == 1) {
                 nodes[i] = -1;
+                nodes[size] = 1;
+                index = size;
             }
+            System.out.println(nodes[i]);
         }
-
         size --;
         minHeap(FRONT);
-
-        return popped;
+        
+        return index;
     }
     public void print()
     {
@@ -166,8 +167,8 @@ class BinaryHeap {
         }
     }
     public void changeKey(int pos, int weight) {
-        heaps[pos] = weight;
-        minHeap(pos);
+        heaps[nodes[pos]] = weight;
+        minHeap(nodes[pos]);
     }
     public boolean isEmpty() {
         return size == 0;
@@ -247,7 +248,7 @@ class Dijkstra {
                 if (S.indexOf(e.get(0)) == -1) {
                     if (pi[v - 1] + e.get(1) < pi[e.get(0) - 1]) {
                         pi[e.get(0) - 1] = pi[v - 1] + e.get(1);
-                        Q.changeKey(e.get(0) - 1, pi[e.get(0) - 1]);
+                        Q.changeKey(e.get(0), pi[e.get(0) - 1]);
                     }
                 }
             }
