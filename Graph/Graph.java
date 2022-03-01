@@ -94,9 +94,6 @@ class BreadthFirstSearch{
         // draw edges and construct the graph
         graphInitiate();
 
-        // call constructor
-        new BreadthFirstSearch();
-
         // check if graph is okay
         System.out.println("check if everything is constructed well....");
         for(int i = 0; i < graph.getAdjLists().size(); i++)
