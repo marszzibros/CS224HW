@@ -66,8 +66,11 @@ class Graph {
         adjLists.get(start - 1).addLast(nodeKey);
     }
 }
+
 class BinaryHeap {
+    // https://www.geeksforgeeks.org/min-heap-in-java/
     private int[] heaps;
+    private int[] nodes;
     private int size;
     private int maxSize;
     
@@ -78,9 +81,97 @@ class BinaryHeap {
         this.size = 0;
         
         heaps = new int[this.maxSize + 1];
-        
+        nodes = new int[this.maxSize + 1];
     }
+    private int getParent(int pos) {
+        return pos / 2;
+    }
+    private int getLeftChild(int pos) {
+        return pos * 2;
+    }
+    private int getRightChild(int pos) { 
+        return (pos * 2) + 1;
+    } 
+    private boolean isLeaf(int pos) {
+        if (pos > (size / 2) && pos <= size) {
+            System.out.println("1");
+            return true;
+        }
+        else return false;
+    }
+    private void swap(int firstPos, int secondPos) {
+        int temp;
+        temp = heaps[firstPos];
+        heaps[firstPos] = heaps[secondPos];
+        heaps[secondPos] = temp;
 
+        temp = nodes[firstPos];
+        nodes[firstPos] = nodes[secondPos];
+        nodes[secondPos] = temp;
+    }
+    private void minHeap(int pos) {
+        if (!isLeaf(pos)) {
+            if (heaps[pos] > heaps[getLeftChild(pos)] || heaps[pos] > heaps[getRightChild(pos)]) {
+                if (heaps[getLeftChild(pos)] < heaps[getRightChild(pos)]) {
+                    swap(pos, getLeftChild(pos));
+                    minHeap(getLeftChild(pos));
+                }
+                else {
+                    swap(pos, getRightChild(pos));
+                    minHeap(getRightChild(pos));
+                }
+            }
+        }
+    }
+    public void insert(int element) {
+        if (size >= maxSize) return;
+        size ++;
+        heaps[size] = element;
+        nodes[size] = size;
+
+        int current = size;
+
+        while (heaps[current]  < heaps[getParent(current)]) { 
+            swap(current, getParent(current));
+            current = getParent(current);
+        }
+    }
+    public int extractMin() {
+        int popped = heaps[FRONT];
+        heaps[FRONT] = heaps[size];
+        for (int i = 0; i < maxSize; i ++) {
+            System.out.println(nodes[i]);
+            if (nodes[i] == 1) {
+                nodes[i] = -1;
+            }
+        }
+
+        size --;
+        minHeap(FRONT);
+
+        return popped;
+    }
+    public void print()
+    {
+        for (int i = 1; i <= size / 2; i++) {
+ 
+            // Printing the parent and both childrens
+            System.out.print(
+                " PARENT : " + heaps[i] 
+                + " LEFT CHILD : " + heaps[2 * i] 
+                + " RIGHT CHILD :" + heaps[2 * i + 1] );
+ 
+            // By here new line is required
+            System.out.println();
+        }
+    }
+    public void changeKey(int pos, int weight) {
+        heaps[pos] = weight;
+        minHeap(pos);
+    }
+    public boolean isEmpty() {
+        return size == 0;
+    }
 }
 
 class Dijkstra {
@@ -120,7 +211,46 @@ class Dijkstra {
         graph.addEdges(7, 8, 19);
     }
     static void dijkstraAlgorithm(Graph graph, int startNode){
+        // Creating object opf class in main() methodn
+        BinaryHeap Q = new BinaryHeap(GRAPHVERTICES + 1);
+        int[] pi = new int[GRAPHVERTICES + 1];
+        final int MAXINFIN = 1000000;
+        Vector<Integer> S = new Vector<Integer>();
         
+        int v = 0;
+        int weight = 0;
+
+        for(int i = 0; i < GRAPHVERTICES; i ++) {
+            Q.insert(MAXINFIN);
+            pi[i] = MAXINFIN;
+        }
+
+        S.clear();
+        pi[0] = 0;
+        Q.changeKey(startNode, 0);
+        while(!Q.isEmpty()) {
+            Q.print(); 
+            weight = Q.extractMin();
+            for (int i = 0; i < GRAPHVERTICES; i ++) {
+                if(pi[i] == weight && S.indexOf(i + 1) == -1) {
+                    v = i + 1;
+                }
+            }
+            S.add(v);
+            System.out.printf("Node %d included in S with the shortest path length x on the path ", S.lastElement());
+            for (int i = 0; i < S.size() - 1; i ++) { 
+                System.out.printf("%d -", S.get(i));
+            }
+            System.out.println(S.lastElement());
+            for (Vector<Integer> e : graph.getAdjLists().get(v - 1)) {
+                System.out.println(e);
+                if (S.indexOf(e.get(0)) == -1) {
+                    if (pi[v - 1] + e.get(1) < pi[e.get(0) - 1]) {
+                        pi[e.get(0) - 1] = pi[v - 1] + e.get(1);
+                        Q.changeKey(e.get(0) - 1, pi[e.get(0) - 1]);
+                    }
+                }
+            }
+        }
     }
-    
 }
