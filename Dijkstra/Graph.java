@@ -328,12 +328,34 @@ class Dijkstra {
             S.add(v);
 
             // printing out the path with weight
-            System.out.printf("Node %d included in S with the shortest path length %d on the path ", S.lastElement(), pi[v - 1]);
-            for (int i = 0; i < s.get(v - 1).size() - 1; i ++) { 
-                System.out.printf("%d - ", s.get(v - 1).get(i));
+            if(S.lastElement() != 1 && S.size() != GRAPHVERTICES) { 
+                System.out.printf("Node %d included in S with the shortest path length %d on the path ", S.lastElement(), pi[v - 1]);
+                for (int i = 0; i < s.get(v - 1).size() - 1; i ++) {
+                    if(i == 0) {
+                        System.out.printf("s - ", s.get(v - 1).get(i));
+                    }
+                    else {
+                        System.out.printf("%d - ", s.get(v - 1).get(i));
+                    }
+                }
+                System.out.println(v);
             }
-            System.out.println(v);
-
+            else if (S.lastElement() == 1){
+                System.out.printf("Node s included in S with the shortest path length %d on the path ", pi[v - 1]);
+                System.out.println("s");
+            }
+            else if (S.size() == GRAPHVERTICES){
+                System.out.printf("Node t included in S with the shortest path length %d on the path ", pi[v - 1]);
+                for (int i = 0; i < s.get(v - 1).size() - 1; i ++) {
+                    if(i == 0) {
+                        System.out.printf("s - ", s.get(v - 1).get(i));
+                    }
+                    else {
+                        System.out.printf("%d - ", s.get(v - 1).get(i));
+                    }
+                }
+                System.out.println("t");
+            }
             // retrieve all the nodes connected to node v 
             for (Vector<Integer> e : graph.getAdjLists().get(v - 1)) {
 
