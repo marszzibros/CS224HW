@@ -69,12 +69,24 @@ class Graph {
 
 class BinaryHeap {
     // https://www.geeksforgeeks.org/min-heap-in-java/
+
+    // heaps vectors; [weight, nodes]
     private Vector<Vector<Integer>> heaps;
+
+    // heaps size, since I did not popped the useless tree
+    // by implementing this, it will automatically set the boundries
     private int size;
+
+    // max size given by usesrs
     private int maxSize;
     
+    // when min heap...
     private static final int FRONT = 1;
     
+    /**
+     * constructors
+     * @param maxSize
+     */
     public BinaryHeap(int maxSize) {
         this.maxSize = maxSize;
         this.size = 0;
@@ -85,21 +97,46 @@ class BinaryHeap {
         temp.add(0);
         heaps.add(temp);
     }
+    /**
+     * get parent methods
+     * @param pos
+     * @return parent position in the heap
+     */
     private int getParent(int pos) {
         return pos / 2;
     }
+    /**
+     * get left child of the heap
+     * @param pos
+     * @return left child
+     */
     private int getLeftChild(int pos) {
         return pos * 2;
     }
+    /**
+     * get right child of the heap
+     * @param pos
+     * @return right child
+     */
     private int getRightChild(int pos) { 
         return (pos * 2) + 1;
     } 
+    /**
+     * check if it is a leaf.
+     * @param pos
+     * @return
+     */
     private boolean isLeaf(int pos) {
         if (pos > (size / 2) && pos <= size) {
             return true;
         }
         else return false;
     }
+    /**
+     * swaping when min heap
+     * @param firstPos
+     * @param secondPos
+     */
     private void swap(int firstPos, int secondPos) {
     
         Vector<Integer> temp = new Vector<Integer>();
@@ -108,24 +145,38 @@ class BinaryHeap {
         heaps.set(firstPos,heaps.get(secondPos));
         heaps.set(secondPos, temp);
     }
+    /**
+     * conduct min heap using recursion
+     * @param pos
+     */
     private void minHeap(int pos) {
+        //if it is not a leaf, conduct heap down
         if (!isLeaf(pos) && (heaps.get(pos).get(0) > heaps.get(getLeftChild(pos)).get(0) 
         || heaps.get(pos).get(0) > heaps.get(getRightChild(pos)).get(0))) {
+            // left child < right child, then change left child with current nodes
             if (heaps.get(getLeftChild(pos)).get(0) < heaps.get(getRightChild(pos)).get(0)) {
                 swap(pos, getLeftChild(pos));
                 minHeap(getLeftChild(pos));
             }
+            // left child > right child, then change left child with current nodes
             else {
                 swap(pos, getRightChild(pos));
                 minHeap(getRightChild(pos));
             }
         }
+       
+        // if it is a leaf, conduct heap up
+        // get parents 
         else if(heaps.get(pos).get(0) < heaps.get(getParent(pos)).get(0)) {
             swap(pos, getParent(pos));
             minHeap(getParent(pos));
             minHeap(pos);
         }
     }
+    /**
+     * insert function when initialize
+     * @param element
+     */
     public void insert(int element) {
         if (size >= maxSize) return;
         Vector<Integer> temp = new Vector<Integer>();
@@ -141,6 +192,10 @@ class BinaryHeap {
             current = getParent(current);
         }
     }
+    /**
+     * extract Min function that gets minimum value of the binary heap
+     * @return
+     */
     public int extractMin() {
         int popped = heaps.get(FRONT).get(1);
         heaps.set(FRONT, heaps.get(size));
@@ -149,21 +204,11 @@ class BinaryHeap {
         
         return popped;
     }
-    public void print()
-    {
-        for (int i = 1; i <= size / 2; i++) {
- 
-            // Printing the parent and both childrens
-            System.out.print(
-                " PARENT : " + heaps.get(i).get(0) 
-                + " LEFT CHILD : " + heaps.get(2 * i).get(0));
-            if (2 * i + 1 < heaps.size()) {               
-                System.out.print(" RIGHT CHILD :" + heaps.get(2 * i + 1).get(0));
-            }
-            // By here new line is required
-            System.out.println();
-        }
-    }
+    /**
+     * changing key, and see if binary heap is still valid
+     * @param pos
+     * @param weight
+     */
     public void changeKey(int pos, int weight) {
         int index = -1;
         for (int i = 1; i <= size; i ++) {
@@ -174,13 +219,17 @@ class BinaryHeap {
         
         heaps.get(index).set(0, weight);
         minHeap(index);
-
     }
+    /**
+     * check is heap is empty
+     */ 
     public boolean isEmpty() {
         return size == 0;
     }
 }
-
+/**
+ * Dijkstra algorithm based on the pseudocode
+ */
 class Dijkstra {
     public static final int GRAPHVERTICES = 8;
 
@@ -189,11 +238,17 @@ class Dijkstra {
         graphInitiate(graph);
         
         System.out.println("Checking if all nodes and weights are correctly connected");
+
+        // adjacency list 
         System.out.println("Graphs is represented using an adjacency list.");
+
+        // checking adjacency list
         for(int i = 0; i < GRAPHVERTICES; i ++) {
             System.out.println(i + 1);
             System.out.println(graph.getAdjLists().get(i));
         }
+
+        // call dijkstra algorithm
         dijkstraAlgorithm(graph, 1);
     }
     /**
@@ -218,54 +273,89 @@ class Dijkstra {
         graph.addEdges(7, 8, 19);
         
     }
+    /**
+     * dijkstra algorithm
+     * @param graph
+     * @param startNode
+     */
     static void dijkstraAlgorithm(Graph graph, int startNode){
         // Creating object opf class in main() methodn
         BinaryHeap Q = new BinaryHeap(GRAPHVERTICES + 1);
+
+        // creating pi
         int[] pi = new int[GRAPHVERTICES + 1];
+
+        // max weight (infinity)
         final int MAXINFIN = 1000000;
+        
+        // S declaration
         Vector<Integer> S = new Vector<Integer>();
+
+        // adding path for each nodes
         Vector<Vector<Integer>> s = new Vector<Vector<Integer>>();
+
+        // initialization of s
         for (int i = 0;i < GRAPHVERTICES; i++) {
             s.add(new Vector<Integer>());
         }
-
         
         int v = 0;
 
+        // set Q infinity
         for(int i = 0; i < GRAPHVERTICES; i ++) {
             Q.insert(MAXINFIN);
             pi[i] = MAXINFIN;
         }
         Vector<Integer> temp = new Vector<Integer>();
 
+        // set all path to be started with s
         temp.add(startNode);
         for (int i = 0;i < GRAPHVERTICES; i++) {
             s.set(i,new Vector<Integer>(temp));
         }
         S.clear();
         pi[0] = 0;
+
+        // changekey s infinity to 0
         Q.changeKey(startNode, 0);
         
+        // dijkstra algorithm
         while(!Q.isEmpty()) {
+            // extracting min from binary heap
             v = Q.extractMin();
             
+            // adding to S
             S.add(v);
+
+            // printing out the path with weight
             System.out.printf("Node %d included in S with the shortest path length %d on the path ", S.lastElement(), pi[v - 1]);
             for (int i = 0; i < s.get(v - 1).size() - 1; i ++) { 
                 System.out.printf("%d - ", s.get(v - 1).get(i));
             }
             System.out.println(v);
+
+            // retrieve all the nodes connected to node v 
             for (Vector<Integer> e : graph.getAdjLists().get(v - 1)) {
+
+                // if v is not added to S 
                 if (S.indexOf(e.get(0)) == -1) {
+
+                    // compare pi(w) + l < pi(v)
                     if (pi[v - 1] + e.get(1) < pi[e.get(0) - 1]) {
+                        // add to the path s
                         s.set(e.get(0) - 1, new Vector<Integer>(s.get(v - 1)));
                         s.get(e.get(0) - 1).add(e.get(0));
+
+                        // change pi
                         pi[e.get(0) - 1] = pi[v - 1] + e.get(1);
+
+                        // change key
                         Q.changeKey(e.get(0), pi[e.get(0) - 1]);
                     }
                 }
             }
         }
+        // printing weights at last
         for (int i = 0; i < GRAPHVERTICES; i ++) {
             System.out.print(pi[i] + " ");
         }
