@@ -69,8 +69,7 @@ class Graph {
 
 class BinaryHeap {
     // https://www.geeksforgeeks.org/min-heap-in-java/
-    private int[] heaps;
-    private int[] nodes;
+    private Vector<Vector<Integer>> heaps;
     private int size;
     private int maxSize;
     
@@ -80,8 +79,11 @@ class BinaryHeap {
         this.maxSize = maxSize;
         this.size = 0;
         
-        heaps = new int[this.maxSize + 1];
-        nodes = new int[this.maxSize + 1];
+        heaps = new Vector<Vector<Integer>>();
+        Vector<Integer> temp = new Vector<Integer>(maxSize + 1);
+        temp.add(0);
+        temp.add(0);
+        heaps.add(temp);
     }
     private int getParent(int pos) {
         return pos / 2;
@@ -99,64 +101,49 @@ class BinaryHeap {
         else return false;
     }
     private void swap(int firstPos, int secondPos) {
-        int temp;
-        int firstIn, secondIn;
-        for (int i = 0; i < maxSize; i ++) {
-            if (nodes[i] == firstPos) {
-                firstIn = i;
-            }
-        }
-
-        for (int i = 0; i < maxSize; i ++) {
-            if (nodes[i] == firstPos) {
-                firstIn = i;
-            }
-        }
-        temp = heaps[firstPos];
-        heaps[firstPos] = heaps[secondPos];
-        heaps[secondPos] = temp;
-
-        temp = nodes[firstPos];
-        nodes[firstPos] = nodes[secondPos];
-        nodes[secondPos] = temp;
+    
+        Vector<Integer> temp = new Vector<Integer>();
+        temp.add(heaps.get(firstPos).get(0));
+        temp.add(heaps.get(firstPos).get(1));
+        heaps.set(firstPos,heaps.get(secondPos));
+        heaps.set(secondPos, temp);
     }
     private void minHeap(int pos) {
-        if (!isLeaf(pos)) {
-            if (heaps[pos] > heaps[getLeftChild(pos)] || heaps[pos] > heaps[getRightChild(pos)]) {
-                if (heaps[getLeftChild(pos)] < heaps[getRightChild(pos)]) {
-                    swap(pos, getLeftChild(pos));
-                    minHeap(getLeftChild(pos));
-                }
-                else {
-                    swap(pos, getRightChild(pos));
-                    minHeap(getRightChild(pos));
-                }
+        if (!isLeaf(pos) && (heaps.get(pos).get(0) > heaps.get(getLeftChild(pos)).get(0) 
+        || heaps.get(pos).get(0) > heaps.get(getRightChild(pos)).get(0))) {
+            if (heaps.get(getLeftChild(pos)).get(0) < heaps.get(getRightChild(pos)).get(0)) {
+                swap(pos, getLeftChild(pos));
+                minHeap(getLeftChild(pos));
             }
+            else {
+                swap(pos, getRightChild(pos));
+                minHeap(getRightChild(pos));
+            }
+        }
+        else if(heaps.get(pos).get(0) < heaps.get(getParent(pos)).get(0)) {
+            swap(pos, getParent(pos));
+            minHeap(getParent(pos));
+            minHeap(pos);
         }
     }
     public void insert(int element) {
         if (size >= maxSize) return;
+        Vector<Integer> temp = new Vector<Integer>();
+        temp.add(element);
+        temp.add(size + 1);
         size ++;
-        heaps[size] = element;
-        nodes[size] = size;
+        heaps.add(temp);
 
         int current = size;
 
-        while (heaps[current]  < heaps[getParent(current)]) { 
+        while (heaps.get(current).get(0) < heaps.get(getParent(current)).get(0)) { 
             swap(current, getParent(current));
             current = getParent(current);
         }
     }
     public int extractMin() {
-        int popped = heaps[FRONT];
-        heaps[FRONT] = heaps[size];
-        for (int i = 0; i < maxSize; i ++) {
-            if (nodes[i] == 1) {
-                nodes[i] = -1;
-                nodes[size] = 1;
-            }
-            System.out.println(nodes[i]);
-        }
+        int popped = heaps.get(FRONT).get(1);
+        heaps.set(FRONT, heaps.get(size));
         size --;
         minHeap(FRONT);
         
@@ -168,17 +155,26 @@ class BinaryHeap {
  
             // Printing the parent and both childrens
             System.out.print(
-                " PARENT : " + heaps[i] 
-                + " LEFT CHILD : " + heaps[2 * i] 
-                + " RIGHT CHILD :" + heaps[2 * i + 1] );
- 
+                " PARENT : " + heaps.get(i).get(0) 
+                + " LEFT CHILD : " + heaps.get(2 * i).get(0));
+            if (2 * i + 1 < heaps.size()) {               
+                System.out.print(" RIGHT CHILD :" + heaps.get(2 * i + 1).get(0));
+            }
             // By here new line is required
             System.out.println();
         }
     }
     public void changeKey(int pos, int weight) {
-        heaps[nodes[pos]] = weight;
-        minHeap(nodes[pos]);
+        int index = -1;
+        for (int i = 1; i <= size; i ++) {
+            if (pos == heaps.get(i).get(1)) {
+                index = i;
+            }
+        }
+        
+        heaps.get(index).set(0, weight);
+        minHeap(index);
+
     }
     public boolean isEmpty() {
         return size == 0;
@@ -215,11 +211,12 @@ class Dijkstra {
         graph.addEdges(3, 5, 20);
         graph.addEdges(3, 8, 44);
         graph.addEdges(5, 6, 11);
-        graph.addEdges(5, 8, 11);
+        graph.addEdges(5, 8, 16);
         graph.addEdges(6, 7, 6);
         graph.addEdges(6, 8, 6);
         graph.addEdges(7, 5, 2);
         graph.addEdges(7, 8, 19);
+        
     }
     static void dijkstraAlgorithm(Graph graph, int startNode){
         // Creating object opf class in main() methodn
@@ -227,46 +224,50 @@ class Dijkstra {
         int[] pi = new int[GRAPHVERTICES + 1];
         final int MAXINFIN = 1000000;
         Vector<Integer> S = new Vector<Integer>();
+        Vector<Vector<Integer>> s = new Vector<Vector<Integer>>();
+        for (int i = 0;i < GRAPHVERTICES; i++) {
+            s.add(new Vector<Integer>());
+        }
+
         
         int v = 0;
-        int weight = 0;
 
         for(int i = 0; i < GRAPHVERTICES; i ++) {
             Q.insert(MAXINFIN);
             pi[i] = MAXINFIN;
         }
+        Vector<Integer> temp = new Vector<Integer>();
 
+        temp.add(startNode);
+        for (int i = 0;i < GRAPHVERTICES; i++) {
+            s.set(i,new Vector<Integer>(temp));
+        }
         S.clear();
         pi[0] = 0;
         Q.changeKey(startNode, 0);
-
-        int count = 0;
-        //while(!Q.isEmpty()) {
-          while(count != 2) {
-             
-            weight = Q.extractMin();
-            Q.print();
-            for (int i = 0; i < GRAPHVERTICES; i ++) {
-                if(pi[i] == weight && S.indexOf(i + 1) == -1) {
-                    v = i + 1;
-                }
-            }
+        
+        while(!Q.isEmpty()) {
+            v = Q.extractMin();
+            
             S.add(v);
-            System.out.printf("Node %d included in S with the shortest path length x on the path ", S.lastElement());
-            for (int i = 0; i < S.size() - 1; i ++) { 
-                System.out.printf("%d - ", S.get(i));
+            System.out.printf("Node %d included in S with the shortest path length %d on the path ", S.lastElement(), pi[v - 1]);
+            for (int i = 0; i < s.get(v - 1).size() - 1; i ++) { 
+                System.out.printf("%d - ", s.get(v - 1).get(i));
             }
-            System.out.println(S.lastElement());
+            System.out.println(v);
             for (Vector<Integer> e : graph.getAdjLists().get(v - 1)) {
-                System.out.println(e);
                 if (S.indexOf(e.get(0)) == -1) {
                     if (pi[v - 1] + e.get(1) < pi[e.get(0) - 1]) {
+                        s.set(e.get(0) - 1, new Vector<Integer>(s.get(v - 1)));
+                        s.get(e.get(0) - 1).add(e.get(0));
                         pi[e.get(0) - 1] = pi[v - 1] + e.get(1);
                         Q.changeKey(e.get(0), pi[e.get(0) - 1]);
                     }
                 }
             }
-            count += 1;
+        }
+        for (int i = 0; i < GRAPHVERTICES; i ++) {
+            System.out.print(pi[i] + " ");
         }
     }
 }
