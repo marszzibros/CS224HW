@@ -100,6 +100,18 @@ class BinaryHeap {
     }
     private void swap(int firstPos, int secondPos) {
         int temp;
+        int firstIn, secondIn;
+        for (int i = 0; i < maxSize; i ++) {
+            if (nodes[i] == firstPos) {
+                firstIn = i;
+            }
+        }
+
+        for (int i = 0; i < maxSize; i ++) {
+            if (nodes[i] == firstPos) {
+                firstIn = i;
+            }
+        }
         temp = heaps[firstPos];
         heaps[firstPos] = heaps[secondPos];
         heaps[secondPos] = temp;
@@ -137,20 +149,18 @@ class BinaryHeap {
     }
     public int extractMin() {
         int popped = heaps[FRONT];
-        int index = -1;
         heaps[FRONT] = heaps[size];
         for (int i = 0; i < maxSize; i ++) {
             if (nodes[i] == 1) {
                 nodes[i] = -1;
                 nodes[size] = 1;
-                index = size;
             }
             System.out.println(nodes[i]);
         }
         size --;
         minHeap(FRONT);
         
-        return index;
+        return popped;
     }
     public void print()
     {
@@ -229,9 +239,13 @@ class Dijkstra {
         S.clear();
         pi[0] = 0;
         Q.changeKey(startNode, 0);
-        while(!Q.isEmpty()) {
-            Q.print(); 
+
+        int count = 0;
+        //while(!Q.isEmpty()) {
+          while(count != 2) {
+             
             weight = Q.extractMin();
+            Q.print();
             for (int i = 0; i < GRAPHVERTICES; i ++) {
                 if(pi[i] == weight && S.indexOf(i + 1) == -1) {
                     v = i + 1;
@@ -240,7 +254,7 @@ class Dijkstra {
             S.add(v);
             System.out.printf("Node %d included in S with the shortest path length x on the path ", S.lastElement());
             for (int i = 0; i < S.size() - 1; i ++) { 
-                System.out.printf("%d -", S.get(i));
+                System.out.printf("%d - ", S.get(i));
             }
             System.out.println(S.lastElement());
             for (Vector<Integer> e : graph.getAdjLists().get(v - 1)) {
@@ -252,6 +266,7 @@ class Dijkstra {
                     }
                 }
             }
+            count += 1;
         }
     }
 }
