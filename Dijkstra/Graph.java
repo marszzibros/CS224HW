@@ -2,7 +2,7 @@
 /**
  * Jay Hwasung Jung
  * CS 224
- * programming homework 01 - BFS
+ * programming homework 05 - Dijkstra
  */
 import java.util.*;
 
